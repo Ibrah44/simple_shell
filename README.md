@@ -3,12 +3,12 @@
 ## Compilation
 All files in this repository should be compiled in the following way:
 
-```gcc -Wall -Werror -Wextra -pedantic *.c -o hsh```
+```gcc -Wall -Werror -Wextra -pedantic -std=gnu8 *.c -o hsh```
 
 ## Project requirements.
 Allowed editors: ```vi, vim, emacs```.
 All files will be compiled on Ubuntu 20.04 LTS.
-Your C programs and functions will be compiled with gcc 4.8.4 using the flags -Wall -Werror -Wextra and -pedantic.
+Your C programs and functions will be compiled with gcc using the flags -Wall -Werror -Wextra -pedantic and -std=gnu8.
 All your files should end with a new line.
 A ```README.md``` file, at the root of the folder of the project is mandatory.
 Your code should use the Betty style. It will be checked using ```betty-style.pl``` and ```betty-doc.pl```.
@@ -39,4 +39,5 @@ Every file contains the functions that will be used to work with the main file:
 ## Authors
 This program was written by:
 
-
+Ibrahim Sserunkuuma (https://github.com/Ibrah44)
+Yassine Boujarfaoui

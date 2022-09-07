@@ -1,0 +1,22 @@
+.TH man 1 "02 Sept 2022" "1.0 Release version" "simple_shell man page"
+
+.SH NAME
+.B simple_shell man page
+
+.SH SYNOPSIS
+.B ./hsh
+
+.SH DESCRIPTION
+simple_shell tries to reproduce the functionalities of the original shell like exit, EOF and much more
+
+.SH BUILTINS
+.B env
+- prints enviroment
+
+.B exit
+- exit the shell
+
+.SH SEE ALSO
+.B The Shell itself
+
+.SH AUTHOR

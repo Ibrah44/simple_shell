@@ -1,25 +1,26 @@
-#include "main.h"
+#include "shell.h"
 
 /**
- * _getenv - retrieves env variable that matches input string
- * @input: input string
- * @environ: local environmental variables
- * Return: string of env variable
+ * _getenv - gets an environment variable.
+ * @name: name of the environment variable.
+ * @env: environ.
+ * Return: the value of the variable searched.
  */
-char *_getenv(char *input, char **environ)
+char *_getenv(const char *name, char **env)
 {
-	register int i = 0;
-	char *tok, *right;
+	char *comp = NULL;
+	int i;
 
-	while (environ[i])
+	if (env == NULL)
+		return (NULL);
+
+	for (i = 0; env[i]; i++)
 	{
-		tok = _strtok(environ[i], "=");
-		if (_strcmp(tok, input) == 0)
+		comp = strtok(env[i], "=");
+		if (strcmp(comp, name) == 0)
 		{
-			right = _strtok(NULL, "=");
-			return (right);
+			return (strtok(NULL, "\n"));
 		}
-		i++;
 	}
 	return (NULL);
 }

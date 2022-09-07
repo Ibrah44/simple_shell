@@ -1,192 +1,144 @@
-.
-.TH man 6 "September 2022" "ALX-Holberton School" "0x16. C - Simple Shell"
+.TH HSH 1 "06 Sept 2022" "V 1.0" "hsh usage manual"
+
 .SH NAME
-.B shellby\fR \- simple UNIX command interpreter
+
+.B hsh
+- command interpreter (shell)
+
 .SH SYNOPSIS
-..B #include \(dqmain.h\(dq
-.sp
-.B int hsh(void)
+
+.br
+Run interactive mode:
+
+.B ./hsh
+
+.br
+Run non-interactive mode:
+
+.br
+echo [command_string | file] |
+.B ./hsh
+
 .SH DESCRIPTION
-.B Overview
-.sp
-The simple shell is an application that reads lines from either a file or the
-terminal, interprets them, and executes them. Users can interactively type directly
-to the
-running shell or pipe in shell scripts.
-.sp
-.B Invocation
-.in +2n
-\fBShellby\fR can be invoked both interactively and non-interactively.
-If \fBshellby\fR is invoked with standard input not connected to a terminal, it reads and executes received commands in order.
 
-If \fBshellby\fR is invoked with standard input connected to a terminal (determined by \fIisatty(3)\fR), an \fIinteractive\fR shell is opened.
-When executing interactively, \fBshellby\fR displays the prompt \fI$ \fR when it is ready to read a command.
+.B hsh
+is a command interpreter that executes commands. Run interactive mode to get a prompt reading line by line from the standard input. Run non-interactive mode to read from a file
+or command_string passed through pipe.
 
-Alternatively, if command line arguments are supplied upon invocation, \fBshellby\fR treats the first argument as a file from which to read commands.
-The supplied file should contain one command per line.
-.B Shellby\fR runs each of the commands contained in the file in order before exiting.
-.in
+.B hsh
+also incorporate the build-in commands
+.I exit
+and
+.I env
 
-.B Environment
-.in +2n
-Upon invocation, \fBshellby\fR receives and copies the environment of the parent process in which it was exeucted.
-This \fBenvironment\fR is an array of \fIname-value\fR strings describing variables in the format \fINAME=VALUE\fR.
-.in
+.B hsh
+was tested to run in Ubuntu 14.04 LTS. And was designed to work as close as possible like
+.I sh
+(default shell).
 
-.B Command Execution
-.in +2n
-After receiving a command, \fBshellby\fR tokenizes it into words using \fB" "\fR as a delimiter.
-The first word is considered the command and all remaining words are considered arguments to that command.
-.B Shellby\fR then proceeds with the following actions:
+.SH DEFINITIONS
+.B word
+is a sequence of characters considered as a single unit.
 
-.RS
-1. If the first character of the command is neither a slash (\fI\\\fR) nor dot (\fI.\fR), the shell searches for it in the list of shell builtins.
-If there exists a shell builtin by that name, the builtin is invoked.
-.RE
+.B name
+is a word consisting only of alphanumeric characters and underscores, and beginning with an alphabetic character or an underscore.
 
-.RS
-2. If the first character of the command is none of a slash (\fI\\\fR), dot (\fI.\fR), nor builtin, \fBshellby\fR searches each element of the
-\fBPATH\fR environmental variable for a directory containing an executable file by that name.
-.RE
+.SH ARGUMENTS
+.br
+After a command has been split into words, the first word is assumed to be the name of a command or executable file. The subsequents arguments are passed like arguments to that command.
 
-.RS
-3. If the first character of the command is a slash (\fI\\\fR) or dot (\fI.\fR) or either of the above searches was successful,
-the shell executes the named program with any remaining arguments given in a separate execution environment.
-.RE
+.SH COMMAND EXECUTION
 
-.B Exit Status
-.in +2n
-.B Shellby\fR returns the exit status of the last command executed, unless a syntax error occurs, with zero indicating success and non-zero indicating failure.
+.br
+If the command
+.I name
+do not start with slash (/), the shell attempts to locate it. If there exists a shell build-in by that name then invoke them.
 
-If a command is not found, the return status is 127; if a command is found but is not executable, the return status is 126.
+If the name is not a built-in,
+.I hsh
+searches each element of the PATH for a directory containing an executable file by that name.
 
-All builtins return zero on success and one or two on incorrect usage (indicated by a corresponding error message).
-.in
+If the
+.I name
+start with slash (/), then checks if it is a valid pathname of a executable file and execute them. If it is a directory, an error message is displayed. 
 
-.B Signals
-.in +2n
-While running in interactive mode, \fBshellby\fR ignores the keyboard input \fBCtrl+c\fR.
-Alternatively, an input of end-of-file (\fBCtrl+d\fR) will exit the program.
-.in
+.SH SHELL BUILTIN COMMANDS
 
-.B Variable Replacement
-.in +2n
-.B Shellby\fR inerprets the \fI$\fR character for variable replacement:
-
-.RS
-.B $ENV_VARIABLE\fR	\fIENV_VARIABLE\fR is subsituted with its value.
-.RE
-
-.RS
-.B $?\fR	\fI?\fR is substituted with the return value of the last program executed.
-.RE
-
-.RS
-.B $$\FR	The second \fI$\fR is substituted with the current process ID.
-.RE
-
-.B Comments
-.in +2n
-.B Shellby\fR ignores all words and characters preceeded by a \fI#\fR character on a line.
-.in
-
-.B Operators
-.in +2n
-
-.RS
-.B ;\fR - Command separator
-.RS
-Commands separated by a \fI;\fR are executed sequentially.
-.RE
-
-.B &&\fR - AND logical operator
-.RS
-.I command1\fR && \fIcommand2\fR: \fIcommand2\fR is executed if, and only if, \fIcommand1\fR returns an exit status of zero.
-.RE
-
-.B ||\fR - OR logical operator
-.RS
-.I command1\fR || \fIcommand2\fR: \fIcommand2\fR is executed if, and only if, \fIcommand1\fR returns a non-zero exit status.
-.RE
-
-The operators \fI&&\fR and \fI||\fR have equal precedence, followed by \fI;\fR.
-.RE
-
-.B Shellby Builtin Commands
-.in +2n
-
-.RS
-.B cd
-.RS
-Usage: .B cd [DIRECTORY]
-
-Changes the current directory of the process to \fBDIRECTORY\fR.
-
-If no argument is given, the command is interpreted as \fBcd $HOME\fR.
-
-If the argument \fB-\fR is given, the command is interpreted as \fBcd $OLDPWD\fR.
-
-The environment variables \fBPWD\fR and \fBOLDPWD\fR are updated after a change of directory.
-.RE
-
-.B alias
-.RS
-Usage: \fBalias [NAME[='VALUE'] ...]\fR
-
-Handles aliases.
-
-.I alias\fR: Prints a list of all aliases, one per line, in the form \fINAME='VALUE'\fR.
-
-.I alias NAME [NAME2 ...]\fR: Prints the aliases \fINAME\fR, \fINAME2\fR, etc. one per line, in the form \fINAME='VALUE'\fR.
-
-.I alias NAME='VALUE' [...]\fR: Defines an alias for each \fINAME\fR whose \fIVALUE\fR is given.
-If \fIname\fR is already an alias, its value is replaced with \fIVALUE\fR.
-.RE
-
-.B exit
-.RS
-Usage: \fBexit [STATUS]\fR
-
-Exits the shell.
-
-The \fBSTATUS\fR argument is the integer used to exit the shell.
-
-If no argument is given, the command is interpreted as \fBexit 0\fR.
-.RE
+.br Build-ins do not receive parameters, any parameter is ignored.
 
 .B env
-.RS
-Usage: \fBenv\fR
+print the current Environment variables.
 
-Prints the current environment.
-.RE
+.B exit
+cause the shell to exit. the exit status is that of the last command executed.
 
-.B setenv
-.RS
-Usage: \fBsetenv [VARIABLE] [VALUE]\fR
+.SH RETURN
 
-Initializes a new environment variable, or modifies an existing one.
+The return value of the most recent command executed before receive the
+.I EOF
+(end-of-file) condition
+.I Ctrl+D
+or the build-in
+.I exit
+is invoked.
 
-Upon failure, prints a message to \fBstderr\fR
-.RE
+.SH EXAMPLES
 
-.B unsetenv
-.RS
-Usage: \fBunsetenv [VARIABLE]\fR
+The shell works like this in interactive mode:
 
-Removes an environmental variable.
+.br
+	($) pwd
+.br
+	/home/vagrant/simple_shell
+.br
+	($) exit
+.br
+	$
 
-Upon failure, prints a message to \fBstderr\fR.
-.RE
-.RE
-.in
+.br
+Running commands with arguments:
 
-.SH SEE ALSO
-access(2), chdir(2), execve(2), _exit(2), exit(3), fflush(3), fork(2), free(3), isatty(3), getcwd(3), malloc(3), open(2), read(2), sh(1), signal(2), stat(2), wait(2), write(2)
+.br
+	($) ls -l
+.br
+	total 72
+.br
+	-rw-rw-r-- 1 vagrant vagrant   343 Sept 06 01:02 built_in.c
+.br
+	-rw-rw-r-- 1 vagrant vagrant   850 Sept 06 01:02 error.c
+.br
+	-rw-rw-r-- 1 vagrant vagrant   555 Sept 06 14:27 execute_line.c
+.br
+	-rw-rw-r-- 1 vagrant vagrant   305 Sept 06 00:46 _getenv.c
+.br
+	-rwxrwxr-x 1 vagrant vagrant 14563 Sept 06 12:57 hsh
+.br
+	($)
 
-.B Shellby\fR emulates basic functionality of the \fBsh\fR shell.
-This man page borrows from the corresponding man pages sh(1) and dash(1).
+.br
+The shell works like this in non-interactive mode:
+
+.br
+	$ echo "/bin/ls" | ./hsh
+.br
+	built_in.c      _getenv.c    man_1_simple_shell  shell.c         split_line.c
+.br
+	error.c         hsh          mini_shell          shell.h         useful_func.c
+.br
+	execute_line.c  list_path.c  README.md           special_case.c  _which.c
+.br
+	$
+
+.br
+Command error example:
+
+.br
+	$ echo "non-interactive" | ./hsh
+.br
+	./hsh: 1: non-interactive: not found
+.br
+	$
+
 .SH AUTHOR
-Ibrahim sserunkuuma and Yassine Boujarfaoui
-.SH SEE ALSO
-.BR sh (1)
+Ibrahim Sserunkuuma 
+Yassine Boujarfaoui

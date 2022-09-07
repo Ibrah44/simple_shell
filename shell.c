@@ -1,150 +1,47 @@
-#include "main.h"
-
+#include "shell.h"
 /**
- * shell - simple shell
- * @build: input build
- */
-void shell(config *build)
+*INThandler - fuction invoked for a signal function and show the prompt
+*@sig_n: number of the signal
+*/
+void INThandler(int sig_n)
 {
-	while (true)
+	(void)sig_n;
+	write(STDOUT_FILENO, "\n($) ", 5);
+}
+/**
+*main - Program that is a simple UNIX command interpreter
+*@argc: argument count
+*@argv: argument char-pointers array
+*@env: the environment
+*Return: 0
+*/
+int main(int argc, char **argv, char **env)
+{
+	char *line = NULL;
+	char **commands;
+	size_t bufsize = 0;
+	ssize_t line_len = 0, count = 0;
+	int exit_st = 0;
+	(void)argc;
+
+	while (1)
 	{
-		checkAndGetLine(build);
-		if (splitString(build) == false)
+		if (isatty(STDIN_FILENO) == 1)
+			write(1, "($) ", 4);
+		signal(SIGINT, INThandler);
+		line_len = getline(&line, &bufsize, stdin);
+		count++;
+		if (special_case(line, line_len, &exit_st) == 3)
 			continue;
-		if (findBuiltIns(build) == true)
-			continue;
-		checkPath(build);
-		forkAndExecute(build);
+		commands = split_line(line);
+		if (_strcmp("exit", *commands) == 0)
+			built_exit(line, commands, &exit_st, count);
+		else if (_strcmp("env", *commands) == 0)
+			built_env(commands, env, &exit_st);
+		else
+			execute_line(argv, commands, count, env, &exit_st, line);
+		fflush(stdin);
 	}
-}
-
-/**
- * checkAndGetLine - check stdin and retrieves next line; handles
- * prompt display
- * @build: input build
- */
-void checkAndGetLine(config *build)
-{
-	register int len;
-	size_t bufferSize = 0;
-	char *ptr, *ptr2;
-
-	build->args = NULL;
-	build->envList = NULL;
-	build->lineCounter++;
-	if (isatty(STDIN_FILENO))
-		displayPrompt();
-	len = getline(&build->buffer, &bufferSize, stdin);
-	if (len == EOF)
-	{
-		freeMembers(build);
-		if (isatty(STDIN_FILENO))
-			displayNewLine();
-		if (build->errorStatus)
-			exit(build->errorStatus);
-		exit(EXIT_SUCCESS);
-
-	}
-	ptr = _strchr(build->buffer, '\n');
-	ptr2 = _strchr(build->buffer, '\t');
-	if (ptr || ptr2)
-		insertNullByte(build->buffer, len - 1);
-	stripComments(build->buffer);
-}
-
-/**
- * stripComments - remove comments from input string
- * @str: input string
- * Return: length of remaining string
- */
-void stripComments(char *str)
-{
-	register int i = 0;
-	_Bool notFirst = false;
-
-	while (str[i])
-	{
-		if (i == 0 && str[i] == '#')
-		{
-			insertNullByte(str, i);
-			return;
-		}
-		if (notFirst)
-		{
-			if (str[i] == '#' && str[i - 1] == ' ')
-			{
-				insertNullByte(str, i);
-				return;
-			}
-		}
-		i++;
-		notFirst = true;
-	}
-}
-
-/**
- * forkAndExecute - fork current build and execute processes
- * @build: input build
- */
-void forkAndExecute(config *build)
-{
-	int status;
-	pid_t f1 = fork();
-
-	convertLLtoArr(build);
-	if (f1 == -1)
-	{
-		perror("error\n");
-		freeMembers(build);
-		freeArgs(build->envList);
-		exit(1);
-	}
-	if (f1 == 0)
-	{
-		if (execve(build->fullPath, build->args, build->envList) == -1)
-		{
-			errorHandler(build);
-			freeMembers(build);
-			freeArgs(build->envList);
-			if (errno == ENOENT)
-				exit(127);
-			if (errno == EACCES)
-				exit(126);
-		}
-	} else
-	{
-		wait(&status);
-		if (WIFEXITED(status))
-			build->errorStatus = WEXITSTATUS(status);
-		freeArgsAndBuffer(build);
-		freeArgs(build->envList);
-	}
-}
-
-/**
- * convertLLtoArr - convert linked list to array
- * @build: input build
- */
-void convertLLtoArr(config *build)
-{
-	register int i = 0;
-	size_t count = 0;
-	char **envList = NULL;
-	linked_l *tmp = build->env;
-
-	count = list_len(build->env);
-	envList = malloc(sizeof(char *) * (count + 1));
-	if (!envList)
-	{
-		perror("Malloc failed\n");
-		exit(1);
-	}
-	while (tmp)
-	{
-		envList[i] = _strdup(tmp->string);
-		tmp = tmp->next;
-		i++;
-	}
-	envList[i] = NULL;
-	build->envList = envList;
+	free(line);
+	return (0);
 }

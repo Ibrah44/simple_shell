@@ -14,7 +14,7 @@ The Simple Shell is a simple UNIX command interpreter written in C. The program 
 - All your header files should be include guarded
 - Use system calls only when you need to (why?)
 ### Compilation
-All of the ``.c`` files along with a main.c file are to be compiled with ``gcc 4.8.4`` on Ubuntu 20.04 LTS with the flags ``-Wall Werror`` ``-Wextra`` ``-pedantic.`` and ``-std=gnu89.``
+All of the ``.c`` files along with a main.c file are to be compiled with ``gcc`` on Ubuntu 20.04 LTS with the flags ``-Wall Werror`` ``-Wextra`` ``-pedantic.`` and ``-std=gnu89.``
 The files will be compiled this way:
 - ``gcc -Wall -Werror -Wextra -pedantic -std=gnu89 *.c -o hsh``
 
@@ -65,6 +65,6 @@ exit | Exits the shell
 
 
 ### Contributors
-- [Ibrahim Sserunkuum](https://github.com/Ibrah44)
+- [Ibrahim Sserunkuuma](https://github.com/Ibrah44)
 - [Yassine Boujarfaoui]
 
